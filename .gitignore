@@ -13,6 +13,7 @@ config.custom
 MAKELOG
 /android-xfstests
 /kvm-xfstests
+/kvmd-xfstests
 /gce-xfstests
 /qemu-xfstests
 /kbuild

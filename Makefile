@@ -1,7 +1,8 @@
 SCRIPTS =	android-xfstests \
 		gce-xfstests \
 		kvm-xfstests \
-		qemu-xfstests
+		qemu-xfstests \
+		kvmd-xfstests
 
 KBUILD_SCRIPTS = kbuild kbuild32 install-kconfig
 
