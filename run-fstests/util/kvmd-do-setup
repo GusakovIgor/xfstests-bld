@@ -1,0 +1,50 @@
+INTANCE_DISKS="$DIR/disks/$INSTANCE_NAME"
+mkdir -p $INTANCE_DISKS
+
+INVALID=""
+if ! test $VDB; then VDB="$INTANCE_DISKS/vdb"; elif ! test -e $VDB; then INVALID+="$VDB "; fi
+if ! test $VDC; then VDC="$INTANCE_DISKS/vdc"; elif ! test -e $VDC; then INVALID+="$VDC "; fi
+if ! test $VDD; then VDD="$INTANCE_DISKS/vdd"; elif ! test -e $VDD; then INVALID+="$VDD "; fi
+if ! test $VDE; then VDE="$INTANCE_DISKS/vde"; elif ! test -e $VDE; then INVALID+="$VDE "; fi
+if ! test $VDF; then VDF="$INTANCE_DISKS/vdf"; elif ! test -e $VDF; then INVALID+="$VDF "; fi
+if ! test $VDG; then VDG="$INTANCE_DISKS/vdg"; elif ! test -e $VDG; then INVALID+="$VDG "; fi
+if ! test $VDI; then VDI="$INTANCE_DISKS/vdi"; elif ! test -e $VDI; then INVALID+="$VDI "; fi
+if ! test $VDJ; then VDJ="$INTANCE_DISKS/vdj"; elif ! test -e $VDJ; then INVALID+="$VDJ "; fi
+
+if test "$INVALID"
+then
+    echo "User-provided disks must exist:"
+    for DISK in $INVALID; do
+        echo "* $DISK"
+    done
+    exit 1;
+fi
+
+if test ! -f "$VDB" ; then
+    qemu-img create -f raw "$VDB" 5g
+    /sbin/mke2fs -q -t ext4 -F "$VDB"
+fi
+if test ! -f "$VDC" ; then
+    qemu-img create -f raw "$VDC" 5g
+fi
+if test ! -f "$VDD" ; then
+    qemu-img create -f raw "$VDD" 5g
+fi
+if test ! -f "$VDE" ; then
+    qemu-img create -f raw "$VDE" 20g
+fi
+if test ! -f "$VDF" ; then
+    qemu-img create -f raw "$VDF" 20g
+fi
+if test ! -f "$VDG" ; then
+    qemu-img create -f raw "$VDG" 5g
+    /sbin/mke2fs -q -t ext4 -F "$VDG"
+fi
+if test ! -f "$VDI" ; then
+    qemu-img create -f raw "$VDI" 1g
+fi
+if test ! -f "$VDJ" ; then
+    qemu-img create -f raw "$VDJ" 1g
+fi
+
+echo "Instance \"$INSTANCE_NAME\" is ready"
