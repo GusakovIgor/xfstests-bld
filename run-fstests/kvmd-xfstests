@@ -120,15 +120,18 @@ fi
 EXTRA_ARG=$(echo "$EXTRA_ARG" | sed -e 's/:/ /')
 
 if test -z "$TESTRUNID" ; then
-    TESTRUNID=$(date +%Y%m%d%H%M)
+    TESTRUNID=$(date +%Y-%m-%d-%H-%M)
 fi
 if test -n "$SKIP_LOG" ; then
-    LOGFILE=/tmp/log.$TESTRUNID
+    LOGDIR=/tmp/$INSTANCE_NAME/$TESTRUNID
 else
-    mkdir -p "$DIR/logs"
-    LOGFILE="$DIR/logs/log.$TESTRUNID"
+    LOGDIR=$DIR/logs/$INSTANCE_NAME/$TESTRUNID
 fi
-RESULTFILE="$DIR/logs/results-$TESTRUNID.tar.xz"
+
+mkdir -p "$LOGDIR"
+LOGFILE="$LOGDIR/run.log"
+RESULTFILE="$LOGDIR/results.tar.xz"
+
 if test -n "$VIRTCONSOLE" ; then
     vc=$(echo "$VIRTCONSOLE" | sed -e "s;VIRTCONFILE;/tmp/console-$INSTANCE_NAME-$TESTRUNID;")
     VIRTCONSOLE="$vc"
