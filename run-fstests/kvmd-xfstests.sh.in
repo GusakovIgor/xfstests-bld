@@ -1,0 +1,7 @@
+#!/bin/sh
+
+DIR=@DIR@
+
+KVMD_XFSTESTS_DIR=$DIR/run-fstests
+export KVMD_XFSTESTS_DIR
+exec $KVMD_XFSTESTS_DIR/kvmd-xfstests "$@"

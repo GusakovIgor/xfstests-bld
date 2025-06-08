@@ -1,0 +1,66 @@
+# Choosing an instance to run.
+# On success:
+# - Sets $INSTANCE_NAME as choice
+# - Sets $INSTANCE_LOCKFD as FD one should close
+#   when ready to give instance away
+# On failure:
+# - Exits
+
+LOCK_DIR="/run/user/$(id -u)/kvmd-xfstests"
+mkdir -p "$LOCK_DIR"
+
+# Creating locks
+for INSTANCE in "${INSTANCES[@]}"
+do
+    LOCKFILE="$LOCK_DIR/$INSTANCE.lock"
+    if ! [ -f "$LOCKFILE" ]; then
+        touch $LOCKFILE
+    fi
+done
+
+if ! [ -z $INSTANCE_NAME ]; then
+    # Trying to use given instance
+    for EXISTING_NAME in "${INSTANCES[@]}"
+    do
+        if [ "$EXISTING_NAME" == "$INSTANCE_NAME" ]; then
+            INSTANCE_PRESENT="True"
+            break
+        fi
+    done
+
+    if ! [ -n "$INSTANCE_PRESENT" ]; then
+        echo "Instance \"$INSTANCE_NAME\" is not defined by config"
+        exit 1
+    fi
+
+    LOCKFILE="$LOCK_DIR/$INSTANCE_NAME.lock"
+    exec {FD}> "$LOCKFILE" 2>/dev/null
+    if flock -n "$FD"; then
+        INSTANCE_LOCK_FD="$FD"
+    else
+        exec {FD}>&-
+        echo "Instance \"$INSTANCE_NAME\" is already running"
+        exit 1
+    fi
+else
+    # Trying to pick first free instance
+    for INSTANCE in "${INSTANCES[@]}"
+    do
+        LOCKFILE="$LOCK_DIR/$INSTANCE.lock"
+        exec {FD}> "$LOCKFILE" 2>/dev/null
+        if flock -n "$FD"; then
+            INSTANCE_NAME="$INSTANCE"
+            INSTANCE_LOCK_FD="$FD"
+            break
+        else
+            exec {FD}>&-
+        fi
+    done
+
+    if ! [ -n "$INSTANCE_NAME" ]; then
+        echo "No available instances to run"
+        exit 1
+    fi
+fi
+
+echo "Picked \"$INSTANCE_NAME\" instance"

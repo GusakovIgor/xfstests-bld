@@ -52,18 +52,18 @@ print_help ()
     echo "	-C count	- Run the specified tests multiple times"
     echo "	-I image	- Use this test appliance image"
     echo "	-m mountopts	- Append mount options to fs config"
-    if flavor_in kvm gce ; then
+    if flavor_in kvm kvmd gce ; then
 	echo "	-n nr_cpus	- Specify the number of cpu's"
     fi
-    if flavor_in kvm ; then
+    if flavor_in kvm kvmd ; then
 	echo "	-numa num	- Ask KVM to create <num> NUMA nodes"
 	echo "	-N		- Enable networking (requires root)"
     fi
-    if flavor_in kvm gce ; then
+    if flavor_in kvm kvmd gce ; then
 	echo "	-o opts		- Extra kernel command line options"
     fi
     echo "	-O opts		- Extra options for test runner"
-    if flavor_in kvm gce ; then
+    if flavor_in kvm kvmd gce ; then
 	echo "	-r ram		- Specify memory to be used in megabytes"
     fi
     echo "	-x group	- Exclude group of tests from running"
@@ -72,15 +72,15 @@ print_help ()
     if flavor_in gce ; then
 	echo "	--arch arch	- Specify the architecture to run on"
     fi
-    if flavor_in kvm ; then
+    if flavor_in kvm kvmd ; then
 	echo "	--initrd initrd	- Boot with the specified initrd"
     elif flavor_in gce ; then
 	echo "	--pmem-device	- Set up persistent memory devices for DAX"
     fi
-    if flavor_in kvm android ; then
+    if flavor_in kvm kvmd android ; then
 	echo "	--no-log	- Don't save the log file for this run"
     fi
-    if flavor_in kvm gce ; then
+    if flavor_in kvm kvmd gce ; then
 	echo "	--no-action	- Print the command to start the VM"
     fi
     if flavor_in gce ; then
@@ -422,7 +422,7 @@ while (( $# >= 1 )); do
 	    MNTOPTS="$1"
 	    ;;
 	-r) shift
-	    supported_flavors kvm gce
+	    supported_flavors kvm kvmd gce
 	    case "$1" in
 		*[mM])
 		    MEM=$(echo "$1" | sed -e 's/[mM]$//')
@@ -455,16 +455,16 @@ while (( $# >= 1 )); do
 	    EXPLICIT_ROOT_FS=yes
 	    ;;
 	-n) shift
-	    supported_flavors kvm gce
+	    supported_flavors kvm kvmd gce
 	    NR_CPU="$1"
 	    EXPLICIT_CPU=yes
 	    ;;
 	-o) shift
-	    supported_flavors kvm gce
+	    supported_flavors kvm kvmd gce
 	    EXTRA_ARG=$(echo "$1" | sed -e 's/ /:/g')
 	    ;;
 	-v)
-	    supported_flavors kvm gce
+	    supported_flavors kvm kvmd gce
 	    if test "$V" = "1" ; then
 		QUIET=""
 		V=2
@@ -474,7 +474,7 @@ while (( $# >= 1 )); do
 	    fi
 	    ;;
 	-N)
-	    supported_flavors kvm
+	    supported_flavors kvm kvmd
 	    DO_NET=yes
 	    ;;
 	-O) shift
@@ -488,22 +488,22 @@ while (( $# >= 1 )); do
 	    fi
 	    ;;
 	--arch) shift
-	    supported_flavors kvm gce
+	    supported_flavors kvm kvmd gce
 	    ARCH="$1"
 	    EXPLICIT_ARCH=yes
 	    ;;
 	--arm64)
-	    supported_flavors kvm gce
+	    supported_flavors kvm kvmd gce
 	    ARCH="arm64"
 	    EXPLICIT_ARCH=yes
 	    ;;
 	--i386)
-	    supported_flavors kvm gce
+	    supported_flavors kvm kvmd gce
 	    ARCH="i386"
 	    EXPLICIT_ARCH=yes
 	    ;;
 	--blktests)
-	    supported_flavors kvm gce
+	    supported_flavors kvm kvmd gce
 	    FSTESTOPT="$FSTESTOPT,blktests"
 	    DO_BLKTESTS=yes
 	    ;;
@@ -522,12 +522,12 @@ while (( $# >= 1 )); do
 	    FAIL_LOOP_COUNT_EXPLICIT=yes
 	    ;;
 	--update-xfstests-tar)
-	    supported_flavors kvm gce
+	    supported_flavors kvm kvmd gce
 	    UPDATE_XFSTESTS_TAR=yes
 	    UPDATE_XFSTESTS=yes
 	    ;;
 	--update-xfstests)
-	    supported_flavors kvm gce
+	    supported_flavors kvm kvmd gce
 	    if ! test -f "$DIR/../fstests-bld/xfstests.tar.gz"
 	    then
 		echo "The xfstests.tar.gz file has not been built!"
@@ -536,14 +536,14 @@ while (( $# >= 1 )); do
 	    UPDATE_XFSTESTS=yes
 	    ;;
 	--update-files)
-	    supported_flavors kvm gce
+	    supported_flavors kvm kvmd gce
 	    UPDATE_FILES=yes
 	    ;;
 	--nfssrv) shift
 	    NFSSRV="$1"
 	    ;;
 	--numa) shift
-	    supported_flavors kvm
+	    supported_flavors kvm kvmd
 	    NUMA_NUM="$1"
 	    case "$NUMA_NUM" in
 		''|*[!0-9]*)
@@ -552,7 +552,7 @@ while (( $# >= 1 )); do
 	    esac
 	    ;;
 	--cpu-type) shift
-	    supported_flavors kvm
+	    supported_flavors kvm kvmd
 	    CPU_TYPE="$1"
 	    ;;
 	--oslogin)
@@ -572,7 +572,7 @@ while (( $# >= 1 )); do
 	    GCE_OSLOGIN_2FA=FALSE
 	    ;;
 	--no-action)
-	    supported_flavors kvm gce
+	    supported_flavors kvm kvmd gce
 	    NO_ACTION="echo -e Would execute:\n\t"
 	    SKIP_LOG=yes
 	    ;;
@@ -589,11 +589,11 @@ while (( $# >= 1 )); do
 	    NO_ZERO=yes
 	    ;;
 	--no-log)
-	    supported_flavors kvm android
+	    supported_flavors kvm kvmd android
 	    SKIP_LOG=yes
 	    ;;
 	--log)
-	    supported_flavors kvm android
+	    supported_flavors kvm kvmd android
 	    SKIP_LOG=no
 	    ;;
 	--kernel) shift
@@ -608,7 +608,7 @@ while (( $# >= 1 )); do
 	    MKFS_CONFIG="$1"
 	    ;;
 	--modules) shift
-	    supported_flavors kvm gce
+	    supported_flavors kvm kvmd gce
 	    case "$1" in
 		gs://*)
 		    MODULES="$1"
@@ -633,7 +633,7 @@ while (( $# >= 1 )); do
 	--note) shift
 	    ;;
 	--initrd) shift
-	    supported_flavors kvm
+	    supported_flavors kvm kvmd
 	    INITRD="$1"
 	    if test ! -f "$INITRD" ; then
 		print_help
@@ -655,7 +655,7 @@ while (( $# >= 1 )); do
 	    PMEM_DEVICE=yes
 	    ;;
 	--machtype) shift
-	    supported_flavors gce kvm
+	    supported_flavors gce kvm kvmd
 	    if flavor_in gce ; then
 		GCE_MACHTYPE="$1"
 	    else
@@ -667,11 +667,11 @@ while (( $# >= 1 )); do
 	    GCE_IMAGE_PROJECT="$1"
 	    ;;
 	--instance-name) shift
-	    supported_flavors gce
+	    supported_flavors gce kvmd
 	    INSTANCE_NAME="$1"
 	    ;;
 	--no-virtio-rng)
-	    supported_flavors kvm
+	    supported_flavors kvm kvmd
 	    NO_VIRTIO_RNG=yes
 	    ;;
 	--no-vm-timeout)
@@ -796,7 +796,7 @@ while (( $# >= 1 )); do
 	    KBUILD_OPTS="$1"
 	    ;;
 	--testrunid) shift
-	    supported_flavors gce kvm
+	    supported_flavors gce kvm kvmd
 	    TESTRUNID="$1"
 	    ;;
 	--email) shift
@@ -831,7 +831,7 @@ while (( $# >= 1 )); do
 	    NO_REGION_SHARD="yes"
 	    ;;
 	--aio) shift
-	    supported_flavors kvm
+	    supported_flavors kvm kvmd
 	    if test "$1" = "default" ; then
 		AIO=
 	    else
@@ -839,26 +839,26 @@ while (( $# >= 1 )); do
 	    fi
 	    ;;
 	--cache) shift
-	    supported_flavors kvm
+	    supported_flavors kvm kvmd
 	    CACHE="$1"
 	    if test "$CACHE" = "default" ; then
 		CACHE=
 	    fi
 	    ;;
 	--virtfs) shift
-	    supported_flavors kvm
+	    supported_flavors kvm kvmd
 	    VIRTFS_PATH="$1"
 	    ;;
 	--virtfs-test) shift
-	    supported_flavors kvm
+	    supported_flavors kvm kvmd
 	    VIRTFS_TEST_PATH="$1"
 	    ;;
 	--virtfs-scratch) shift
-	    supported_flavors kvm
+	    supported_flavors kvm kvmd
 	    VIRTFS_SCRATCH_PATH="$1"
 	    ;;
 	--virtfs-model) shift
-	    supported_flavors kvm
+	    supported_flavors kvm kvmd
 	    VIRTFS_MODEL="$1"
 	    ;;
 	--vm-timeout)
@@ -866,15 +866,15 @@ while (( $# >= 1 )); do
 	    unset GCE_NO_VM_TIMEOUT
 	    ;;
 	--archive)
-	    supported_flavors kvm
+	    supported_flavors kvm kvmd
 	    DO_ARCHIVE=1
 	    ;;
 	--no-archive)
-	    supported_flavors kvm
+	    supported_flavors kvm kvmd
 	    unset DO_ARCHIVE
 	    ;;
 	--stress-opts) shift
-	    supported_flavors kvm gce
+	    supported_flavors kvm kvmd gce
 	    stress_opts=$(echo "$1" | sed -e 's/ /,/g')
 	    if test -n "$FSTESTSTR" ; then
 		FSTESTSTR="$FSTESTSTR $stress_opts"
@@ -884,7 +884,7 @@ while (( $# >= 1 )); do
 	    unset stress_opts
 	    ;;
 	--stress-mem) shift
-	    supported_flavors kvm gce
+	    supported_flavors kvm kvmd gce
 	    stress_opts="-m,1,--vm-bytes,$1"
 	    if test -n "$FSTESTSTR" ; then
 		FSTESTSTR="$FSTESTSTR $stress_opts"
@@ -935,7 +935,7 @@ while (( $# >= 1 )); do
 	    FSTESTSET="$FSTESTSET,-g,auto"
 	    ;;
 	syz)
-	    supported_flavors kvm
+	    supported_flavors kvm kvmd
 	    shift
 	    if test "$1"x = "x" ; then
 		echo "Missing syzkaller repro"
