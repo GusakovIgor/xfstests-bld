@@ -31,6 +31,7 @@ PTS_SIZE=$(parse pts_size)
 CMD=$(parse cmd)
 FSTESTEXC=$(parse fstestexc | sed -e 's/\./ /g')
 FSTEST_ARCHIVE=$(parse fstestarc | sed -e 's/\./ /g')
+FSTEST_COVERAGE=$(parse fstestcov | sed -e 's/\./ /g')
 NFSSRV=$(parse nfssrv)
 
 cat > /run/test-env <<EOF
@@ -106,6 +107,12 @@ fi
 export FSTESTCFG FSTESTSET FSTESTOPT FSTESTTYP FSTESTAPI FSTESTSTR FSTESTEXC
 export MNTOPTS FSTEST_ARCHIVE NFSSRV FILESTORE_TOP FILESTORE_SUBDIR
 export ORIG_CMDLINE
+
+if test -n "$FSTEST_COVERAGE"
+then
+	mkdir -p "/results/gcov"
+	export REPORT_GCOV="/results/gcov"
+fi
 
 case "$FSTESTOPT" in
     *blktests*)

@@ -74,6 +74,7 @@ print_help ()
     fi
     if flavor_in kvm kvmd ; then
 	echo "	--initrd initrd	- Boot with the specified initrd"
+	echo "	--coverage	- Gather coverage"
     elif flavor_in gce ; then
 	echo "	--pmem-device	- Set up persistent memory devices for DAX"
     fi
@@ -314,6 +315,7 @@ bucket-subdir:
 cache:
 commit:
 config:
+coverage
 cpu-type:
 disable-serial
 email:
@@ -873,6 +875,10 @@ while (( $# >= 1 )); do
 	    supported_flavors kvm kvmd
 	    unset DO_ARCHIVE
 	    ;;
+	--coverage)
+	    supported_flavors kvm kvmd
+	    GATHER_COVERAGE=1
+		;;
 	--stress-opts) shift
 	    supported_flavors kvm kvmd gce
 	    stress_opts=$(echo "$1" | sed -e 's/ /,/g')
@@ -1300,6 +1306,10 @@ fi
 
 if test -n "$DO_ARCHIVE" ; then
     ARG="$ARG fstestarc=$DO_ARCHIVE"
+fi
+
+if test -n "$GATHER_COVERAGE" ; then
+    ARG="$ARG fstestcov=$GATHER_COVERAGE"
 fi
 
 set_canonicalized_arch "$ARCH"
