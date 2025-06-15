@@ -170,6 +170,15 @@ if test -n "$VIRTFS_SCRATCH_PATH"; then
     VIRTFS+="-device virtio-9p-pci,fsdev=p9scratch,mount_tag=9pscratch "
 fi
 
+VIRTIO_PMEM=""
+if test -n "$PMEM_VIRTIO_DEVICE" ; then
+	VIRTIO_PMEM+="-object memory-backend-file,id=mem1,share=on,mem-path=$PMEM0,size=5G "
+	VIRTIO_PMEM+="-device virtio-pmem-pci,memdev=mem1,id=nv1 "
+	VIRTIO_PMEM+="-object memory-backend-file,id=mem2,share=on,mem-path=$PMEM1,size=5G "
+	VIRTIO_PMEM+="-device virtio-pmem-pci,memdev=mem2,id=nv2 "
+	MEM+=",slots=2,maxmem=12G"
+fi
+
 VDH="$ourtmp/kvm-vdh"
 tar -c -f "$VDH" -T /dev/null
 
@@ -263,6 +272,7 @@ $NO_ACTION $IONICE $QEMU -boot order=c $NET \
 	-drive file=$VDJ,${CACHE}if=virtio,format=raw$AIO \
 	-vga none -nographic -smp $NR_CPU -m $MEM \
 	$VIRTFS \
+	$VIRTIO_PMEM \
 	$VIRTIO_RNG \
 	$VIRTCONSOLE \
 	$CONSOLE \
