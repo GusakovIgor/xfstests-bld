@@ -148,7 +148,7 @@ if type ionice >& /dev/null ; then
 fi
 
 if test -z "$VIRTFS_PATH"; then
-    VIRTFS_PATH=/tmp/kvmd-xfstests-$USER/$INSTANCE_NAME
+    VIRTFS_PATH=/tmp/kvmd-xfstests-$(whoami)/$INSTANCE_NAME
 fi
 mkdir -p $VIRTFS_PATH
 VIRTFS="-fsdev local,id=v_tmp,path=$VIRTFS_PATH,security_model=none "
