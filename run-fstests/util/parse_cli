@@ -75,6 +75,11 @@ print_help ()
     if flavor_in kvm kvmd ; then
 	echo "	--initrd initrd	- Boot with the specified initrd"
 	echo "	--coverage	- Gather coverage"
+    fi
+    if flavor_in kvmd ; then
+	echo "	--pmem-virtio-device"
+	echo "			- Set up persistent memory devices for DAX"
+	echo "			  using pmem-virtio"
     elif flavor_in gce ; then
 	echo "	--pmem-device	- Set up persistent memory devices for DAX"
     fi
@@ -369,6 +374,7 @@ no-vm-timeout
 no-zero
 numa:
 pmem-device
+pmem-virtio-device
 pts-size:
 preemptible
 spot
@@ -655,6 +661,10 @@ while (( $# >= 1 )); do
 	--pmem-device)
 	    supported_flavors gce
 	    PMEM_DEVICE=yes
+	    ;;
+	--pmem-virtio-device)
+	    supported_flavors kvmd
+	    PMEM_VIRTIO_DEVICE=yes
 	    ;;
 	--machtype) shift
 	    supported_flavors gce kvm kvmd
@@ -1263,7 +1273,11 @@ FSTESTOPT=${FSTESTOPT/#,/}
 
 case "$FSTESTCFG" in
     dax|dax,*|*,dax,*|*,dax|*/dax|*/dax,*)
-	PMEM_DEVICE=yes
+		if flavor_in kvmd ; then
+			PMEM_VIRTIO_DEVICE=yes
+		else
+			PMEM_DEVICE=yes
+		fi
 	;;
     filestore*|*filestore|*filestore*)
 	if test -z "$NFSSRV" ; then

@@ -10,6 +10,10 @@ if ! test $VDF; then VDF="$INTANCE_DISKS/vdf"; elif ! test -e $VDF; then INVALID
 if ! test $VDG; then VDG="$INTANCE_DISKS/vdg"; elif ! test -e $VDG; then INVALID+="$VDG "; fi
 if ! test $VDI; then VDI="$INTANCE_DISKS/vdi"; elif ! test -e $VDI; then INVALID+="$VDI "; fi
 if ! test $VDJ; then VDJ="$INTANCE_DISKS/vdj"; elif ! test -e $VDJ; then INVALID+="$VDJ "; fi
+if test -n "$PMEM_VIRTIO_DEVICE" ; then
+    if ! test $PMEM0; then PMEM0="$INTANCE_DISKS/pmem0"; fi
+    if ! test $PMEM1; then PMEM1="$INTANCE_DISKS/pmem1"; fi
+fi
 
 if test "$INVALID"
 then
@@ -45,6 +49,11 @@ if test ! -f "$VDI" ; then
 fi
 if test ! -f "$VDJ" ; then
     qemu-img create -f raw "$VDJ" 1g
+fi
+
+if test -n "$PMEM_VIRTIO_DEVICE" ; then
+    qemu-img create -f raw "$PMEM0" 5g
+    qemu-img create -f raw "$PMEM1" 5g
 fi
 
 echo "Instance \"$INSTANCE_NAME\" is ready"

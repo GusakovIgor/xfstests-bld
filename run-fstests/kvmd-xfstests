@@ -148,7 +148,7 @@ if type ionice >& /dev/null ; then
 fi
 
 if test -z "$VIRTFS_PATH"; then
-    VIRTFS_PATH=/tmp/kvmd-xfstests-$USER/$INSTANCE_NAME
+    VIRTFS_PATH=/tmp/kvmd-xfstests-$(whoami)/$INSTANCE_NAME
 fi
 mkdir -p $VIRTFS_PATH
 VIRTFS="-fsdev local,id=v_tmp,path=$VIRTFS_PATH,security_model=none "
@@ -168,6 +168,15 @@ if test -n "$VIRTFS_SCRATCH_PATH"; then
     VIRTFS+=" -fsdev local,id=p9scratch,path=$VIRTFS_SCRATCH_PATH,"
     VIRTFS+="security_model=$VIRTFS_MODEL "
     VIRTFS+="-device virtio-9p-pci,fsdev=p9scratch,mount_tag=9pscratch "
+fi
+
+VIRTIO_PMEM=""
+if test -n "$PMEM_VIRTIO_DEVICE" ; then
+	VIRTIO_PMEM+="-object memory-backend-file,id=mem1,share=on,mem-path=$PMEM0,size=5G "
+	VIRTIO_PMEM+="-device virtio-pmem-pci,memdev=mem1,id=nv1 "
+	VIRTIO_PMEM+="-object memory-backend-file,id=mem2,share=on,mem-path=$PMEM1,size=5G "
+	VIRTIO_PMEM+="-device virtio-pmem-pci,memdev=mem2,id=nv2 "
+	MEM+=",slots=2,maxmem=12G"
 fi
 
 VDH="$ourtmp/kvm-vdh"
@@ -263,6 +272,7 @@ $NO_ACTION $IONICE $QEMU -boot order=c $NET \
 	-drive file=$VDJ,${CACHE}if=virtio,format=raw$AIO \
 	-vga none -nographic -smp $NR_CPU -m $MEM \
 	$VIRTFS \
+	$VIRTIO_PMEM \
 	$VIRTIO_RNG \
 	$VIRTCONSOLE \
 	$CONSOLE \
